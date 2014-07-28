@@ -1,0 +1,9 @@
+doc/
+bin/
+lib/
+obj/
+.metadata/
+.settings/
+.project
+.cproject
+TODO
