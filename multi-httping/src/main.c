@@ -62,6 +62,89 @@ char ncurses_mode = 0;
 
 int fd = -1;
 
+static struct option long_options[] =
+{
+	{"aggregate",   1, NULL, 9 },
+	{"url",		1, NULL, 'g' },
+	{"hostname",	1, NULL, 'h' },
+	{"port",	1, NULL, 'p' },
+	{"proxy",	1, NULL, 'x' },
+	{"count",	1, NULL, 'c' },
+	{"persistent-connections",	0, NULL, 'Q' },
+	{"interval",	1, NULL, 'i' },
+	{"timeout",	1, NULL, 't' },
+	{"ipv6",	0, NULL, '6' },
+	{"show-statuscodes",	0, NULL, 's' },
+	{"split-time",	0, NULL, 'S' },
+	{"get-request",	0, NULL, 'G' },
+	{"show-transfer-speed",	0, NULL, 'b' },
+	{"show-xfer-speed-compressed",	0, NULL, 'B' },
+	{"data-limit",	1, NULL, 'L' },
+	{"show-kb",	0, NULL, 'X' },
+	{"no-cache",	0, NULL, 'Z' },
+#ifndef NO_SSL
+	{"use-ssl",	0, NULL, 'l' },
+	{"show-fingerprint",	0, NULL, 'z' },
+#endif
+	{"flood",	0, NULL, 'f' },
+	{"audible-ping",	0, NULL, 'a' },
+	{"parseable-output",	0, NULL, 'm' },
+	{"ok-result-codes",	1, NULL, 'o' },
+	{"result-string",	1, NULL, 'e' },
+	{"user-agent",	1, NULL, 'I' },
+	{"referer",	1, NULL, 'S' },
+	{"resolve-once",0, NULL, 'r' },
+	{"nagios-mode-1",	1, NULL, 'n' },
+	{"nagios-mode-2",	1, NULL, 'n' },
+	{"bind-to",	1, NULL, 'y' },
+	{"quiet",	0, NULL, 'q' },
+	{"username",	1, NULL, 'U' },
+	{"password",	1, NULL, 'P' },
+	{"cookie",	1, NULL, 'C' },
+	{"colors",	0, NULL, 'Y' },
+	{"offset-yellow",	1, NULL, 1   },
+	{"threshold-yellow",	1, NULL, 1   },
+	{"offset-red",	1, NULL, 2   },
+	{"threshold-red",	1, NULL, 2   },
+	{"offset-show",	1, NULL, 3   },
+	{"show-offset",	1, NULL, 3   },
+	{"threshold-show",	1, NULL, 3   },
+	{"show-threshold",	1, NULL, 3   },
+	{"timestamp",	0, NULL, 4   },
+	{"ts",		0, NULL, 4   },
+	{"no-host-header",	0, NULL, 5 },
+	{"proxy-buster",	1, NULL, 6 },
+	{"proxy-user",	1, NULL, 7 },
+	{"proxy-password",	1, NULL, 8 },
+	{"proxy-password-file",	1, NULL, 10 },
+	{"graph-limit",	1, NULL, 11 },
+	{"adaptive-interval",	0, NULL, 12 },
+	{"ai",	0, NULL, 12 },
+	{"slow-log",	0, NULL, 13 },
+	{"draw-phase",	0, NULL, 14 },
+	{"no-tcp-nodelay",	0, NULL, 15 },
+	{"max-mtu", 1, NULL, 16 },
+	{"keep-cookies", 0, NULL, 17 },
+	{"abbreviate", 0, NULL, 18 },
+	{"divert-connect", 1, NULL, 19 },
+	{"recv-buffer", 1, NULL, 20 },
+	{"tx-buffer", 1, NULL, 21 },
+	{"priority", 1, NULL, 23 },
+	{"tos", 1, NULL, 24 },
+	{"header", 1, NULL, 25 },
+#ifdef NC
+	{"ncurses",	0, NULL, 'K' },
+	{"gui",	0, NULL, 'K' },
+#ifdef FW
+	{"no-graph",	0, NULL, 'D' },
+#endif
+#endif
+	{"version",	0, NULL, 'V' },
+	{"help",	0, NULL, 22 },
+	{NULL,		0, NULL, 0   }
+};
+
+
 void determine_terminal_size(int *max_y, int *max_x)
 {
         struct winsize size;
@@ -324,11 +407,11 @@ char * create_http_request_header(const char *get, char use_proxy_host, char get
 
 	/* Basic Authentification */
 	if (auth_usr)
-	{ 
+	{
 		char auth_string[256] = { 0 };
 		char b64_auth_string[512] = { 0 };
 
-		sprintf(auth_string, "%s:%s", auth_usr, auth_password); 
+		sprintf(auth_string, "%s:%s", auth_usr, auth_password);
 		enc_b64(auth_string, strlen(auth_string), b64_auth_string);
 
 		str_add(&request, "Authorization: Basic %s\r\n", b64_auth_string);
@@ -336,11 +419,11 @@ char * create_http_request_header(const char *get, char use_proxy_host, char get
 
 	/* proxy authentication */
 	if (proxy_user)
-	{ 
+	{
 		char ppa_string[256] = { 0 };
 		char b64_ppa_string[512] = { 0 };
 
-		sprintf(ppa_string, "%s:%s", proxy_user, proxy_password); 
+		sprintf(ppa_string, "%s:%s", proxy_user, proxy_password);
 		enc_b64(ppa_string, strlen(ppa_string), b64_ppa_string);
 
 		str_add(&request, "Proxy-Authorization: Basic %s\r\n", b64_ppa_string);
@@ -813,7 +896,7 @@ void free_headers(char **additional_headers, int n_additional_headers)
 	free(additional_headers);
 }
 
-int main(int argc, char *argv[])
+int main_single_host(int argc, char *argv[])
 {
 	char do_fetch_proxy_settings = 0;
 	char *hostname = NULL;
@@ -908,88 +991,6 @@ int main(int argc, char *argv[])
 	init_statst(&stats_header_size);
 
 	determine_terminal_size(&max_y, &max_x);
-
-	static struct option long_options[] =
-	{
-		{"aggregate",   1, NULL, 9 },
-		{"url",		1, NULL, 'g' },
-		{"hostname",	1, NULL, 'h' },
-		{"port",	1, NULL, 'p' },
-		{"proxy",	1, NULL, 'x' },
-		{"count",	1, NULL, 'c' },
-		{"persistent-connections",	0, NULL, 'Q' },
-		{"interval",	1, NULL, 'i' },
-		{"timeout",	1, NULL, 't' },
-		{"ipv6",	0, NULL, '6' },
-		{"show-statuscodes",	0, NULL, 's' },
-		{"split-time",	0, NULL, 'S' },
-		{"get-request",	0, NULL, 'G' },
-		{"show-transfer-speed",	0, NULL, 'b' },
-		{"show-xfer-speed-compressed",	0, NULL, 'B' },
-		{"data-limit",	1, NULL, 'L' },
-		{"show-kb",	0, NULL, 'X' },
-		{"no-cache",	0, NULL, 'Z' },
-#ifndef NO_SSL
-		{"use-ssl",	0, NULL, 'l' },
-		{"show-fingerprint",	0, NULL, 'z' },
-#endif
-		{"flood",	0, NULL, 'f' },
-		{"audible-ping",	0, NULL, 'a' },
-		{"parseable-output",	0, NULL, 'm' },
-		{"ok-result-codes",	1, NULL, 'o' },
-		{"result-string",	1, NULL, 'e' },
-		{"user-agent",	1, NULL, 'I' },
-		{"referer",	1, NULL, 'S' },
-		{"resolve-once",0, NULL, 'r' },
-		{"nagios-mode-1",	1, NULL, 'n' },
-		{"nagios-mode-2",	1, NULL, 'n' },
-		{"bind-to",	1, NULL, 'y' },
-		{"quiet",	0, NULL, 'q' },
-		{"username",	1, NULL, 'U' },
-		{"password",	1, NULL, 'P' },
-		{"cookie",	1, NULL, 'C' },
-		{"colors",	0, NULL, 'Y' },
-		{"offset-yellow",	1, NULL, 1   },
-		{"threshold-yellow",	1, NULL, 1   },
-		{"offset-red",	1, NULL, 2   },
-		{"threshold-red",	1, NULL, 2   },
-		{"offset-show",	1, NULL, 3   },
-		{"show-offset",	1, NULL, 3   },
-		{"threshold-show",	1, NULL, 3   },
-		{"show-threshold",	1, NULL, 3   },
-		{"timestamp",	0, NULL, 4   },
-		{"ts",		0, NULL, 4   },
-		{"no-host-header",	0, NULL, 5 },
-		{"proxy-buster",	1, NULL, 6 },
-		{"proxy-user",	1, NULL, 7 },
-		{"proxy-password",	1, NULL, 8 },
-		{"proxy-password-file",	1, NULL, 10 },
-		{"graph-limit",	1, NULL, 11 },
-		{"adaptive-interval",	0, NULL, 12 },
-		{"ai",	0, NULL, 12 },
-		{"slow-log",	0, NULL, 13 },
-		{"draw-phase",	0, NULL, 14 },
-		{"no-tcp-nodelay",	0, NULL, 15 },
-		{"max-mtu", 1, NULL, 16 },
-		{"keep-cookies", 0, NULL, 17 },
-		{"abbreviate", 0, NULL, 18 },
-		{"divert-connect", 1, NULL, 19 },
-		{"recv-buffer", 1, NULL, 20 },
-		{"tx-buffer", 1, NULL, 21 },
-		{"priority", 1, NULL, 23 },
-		{"tos", 1, NULL, 24 },
-		{"header", 1, NULL, 25 },
-#ifdef NC
-		{"ncurses",	0, NULL, 'K' },
-		{"gui",	0, NULL, 'K' },
-#ifdef FW
-		{"no-graph",	0, NULL, 'D' },
-#endif
-#endif
-		{"version",	0, NULL, 'V' },
-		{"help",	0, NULL, 22 },
-		{NULL,		0, NULL, 0   }
-	};
 
 	signal(SIGPIPE, SIG_IGN);
 
@@ -1309,7 +1310,7 @@ int main(int argc, char *argv[])
 				fprintf(stderr, gettext("Warning: TCP TFO is not supported. Disabling.\n"));
 #endif
 				break;
- 
+
 			case 22:
 				version();
 
@@ -2399,4 +2400,43 @@ error_exit:
 		return 0;
 	else
 		return 127;
+}
+
+int main(int argc, char *argv[])
+{
+	int c = 0;
+	int ncurses_mode = 0;
+	int explicit_url = 0;
+
+	while ((c = getopt_long(argc, argv,
+			"DKEA5MvYWT:ZQ6Sy:XL:bBg:h:p:c:i:Gx:t:o:e:falqsmV?I:R:rn:N:zP:U:C:F",
+			long_options, NULL)) != -1)
+	{
+		switch (c)
+		{
+#ifdef NC
+			case 'K':
+				ncurses_mode = 1;
+				break;
+#endif
+			case 'g':
+			case 'h':
+				explicit_url = 1;
+				break;
+		}
+	}
+
+	if (optind > argc - 1 || (optind == argc - 1 && explicit_url == 0))
+	{
+		optind = 1;
+		return main_single_host(argc, argv);
+	}
+
+	if (ncurses_mode)
+	{
+		fprintf(stderr, gettext("The ncurses interface (-K) is not supported with multiple hosts.\n"));
+		return 1;
+	}
+
+	return 0;
 }
