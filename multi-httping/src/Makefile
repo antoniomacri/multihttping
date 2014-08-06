@@ -58,7 +58,7 @@ COMPRESS=/bin/gzip -9
 
 TRANSLATIONS=nl.mo
 
-OBJS=gen.o http.o io.o error.o utils.o main.o tcp.o res.o socks5.o kalman.o cookies.o help.o colors.o
+OBJS=gen.o http.o io.o error.o utils.o main.o tcp.o res.o socks5.o kalman.o cookies.o help.o colors.o multihost.o
 
 MAN_EN=httping.1
 MAN_NL=httping-nl.1

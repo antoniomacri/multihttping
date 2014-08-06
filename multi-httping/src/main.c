@@ -48,6 +48,8 @@
 #endif
 #include "cookies.h"
 
+#include "multihost.h"
+
 volatile int stop = 0;
 
 int quiet = 0;
@@ -2455,6 +2457,20 @@ int main(int argc, char *argv[])
 	// at the beginning of the vector: therefore, all hosts are moved to the end of argv.
 	for (i = optind; i < argc; i++)
 	{
+		if (nhosts >= MAX_HOSTS)
+		{
+			fprintf(stderr, gettext("Reached the maximum number of hosts (%d)."), MAX_HOSTS);
+			break;
+		}
+
+		int filedes[2];
+		if (pipe(filedes) != 0)
+		{
+			perror(gettext("Cannot open pipe"));
+			killpg(0, SIGTERM);
+			return 1;
+		}
+
 		int pid = fork();
 		if (pid < 0)
 		{
@@ -2464,15 +2480,25 @@ int main(int argc, char *argv[])
 		}
 		if (pid == 0)
 		{
+			while ((dup2(filedes[1], STDOUT_FILENO) < 0) && (errno == EINTR)) { }
+			close(filedes[0]);
+			close(filedes[1]);
+
 			argv[optind] = argv[i];
 			argc = optind + 1;
 			argv[argc] = NULL; // The C Standard 5.1.2.2.1: argv[argc] shall be a null pointer.
 			return main_single_host(argc, argv);
 		}
+		close(filedes[1]);
+
+		hosts[nhosts].read_fd = filedes[0];
+		nhosts++;
 	}
 
 	signal(SIGINT, handler_parent);
 	signal(SIGTERM, handler_parent);
+
+	parse_children_output();
 
 	printf(gettext("Waiting for all children to exit.\n"));
 	while (waitpid(-1, NULL, 0))
