@@ -2402,9 +2402,16 @@ error_exit:
 		return 127;
 }
 
+void handler_parent(int sig)
+{
+	fprintf(stderr, gettext("Parent got signal %d\n"), sig);
+	signal(sig, SIG_IGN);
+	killpg(0, sig);
+}
+
 int main(int argc, char *argv[])
 {
-	int c = 0;
+	int c = 0, i = 0;
 	int ncurses_mode = 0;
 	int explicit_url = 0;
 
@@ -2432,10 +2439,46 @@ int main(int argc, char *argv[])
 		return main_single_host(argc, argv);
 	}
 
+	if (explicit_url)
+	{
+		fprintf(stderr, gettext("Options -g and -h are meaningless with multiple hosts.\n"));
+		return 1;
+	}
+
 	if (ncurses_mode)
 	{
 		fprintf(stderr, gettext("The ncurses interface (-K) is not supported with multiple hosts.\n"));
 		return 1;
+	}
+
+	// The default implementation of getopt permutes argv in order to put all options
+	// at the beginning of the vector: therefore, all hosts are moved to the end of argv.
+	for (i = optind; i < argc; i++)
+	{
+		int pid = fork();
+		if (pid < 0)
+		{
+			perror(gettext("Cannot create child process"));
+			killpg(0, SIGTERM);
+			return 1;
+		}
+		if (pid == 0)
+		{
+			argv[optind] = argv[i];
+			argc = optind + 1;
+			argv[argc] = NULL; // The C Standard 5.1.2.2.1: argv[argc] shall be a null pointer.
+			return main_single_host(argc, argv);
+		}
+	}
+
+	signal(SIGINT, handler_parent);
+	signal(SIGTERM, handler_parent);
+
+	printf(gettext("Waiting for all children to exit.\n"));
+	while (waitpid(-1, NULL, 0))
+	{
+		if (errno == ECHILD)
+			break;
 	}
 
 	return 0;
