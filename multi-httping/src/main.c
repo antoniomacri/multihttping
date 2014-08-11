@@ -1433,9 +1433,11 @@ int main_single_host(int argc, char *argv[])
 #ifdef NC
 		if (ncurses_mode)
 			slow_log("\nPING %s:%d (%s):", hostname, portnr, get);
+
 		else
 #endif
 		printf("PING %s%s:%s%d%s (%s):\n", c_green, hostname, c_bright, portnr, c_normal, get);
+
 	}
 
 	if (json_output)
@@ -2162,7 +2164,8 @@ persistent_loop:
 				if (persistent_connections && show_bytes_xfer)
 					str_add(&line, gettext("%s%s%s%s%s:%s%d%s (%d/%d bytes), seq=%s%d%s "), c_red, i6_bs, current_host, i6_be, c_white, c_yellow, portnr, c_white, headers_len, len, c_blue, curncount-1, c_white);
 				else
-					str_add(&line, gettext("%s%s%s%s%s:%s%d%s (%d bytes), seq=%s%d%s "), c_red, i6_bs, current_host, i6_be, c_white, c_yellow, portnr, c_white, headers_len, c_blue, curncount-1, c_white);
+				//aggiunto nome
+					str_add(&line, gettext("%s\n Address: %s%s%s%s%s:%s%d%s (%d bytes), seq=%s%d%s "), complete_url, c_red, i6_bs, current_host, i6_be, c_white, c_yellow, portnr, c_white, headers_len, c_blue, curncount-1, c_white);
 
 				char *tot_str = format_value(t_total.cur, 6, 2, abbreviate);
 
@@ -2337,8 +2340,10 @@ persistent_loop:
 	if (!quiet && !machine_readable && !nagios_mode && !json_output)
 	{
 		int dummy = count;
+//aggiunt pid
+		int pid=getpid();
+		printf(gettext("--- pid %d %s ping statistics  ---\n"), pid, complete_url);
 
-		printf(gettext("--- %s ping statistics ---\n"), complete_url);
 
 		if (curncount == 0 && err > 0)
 			fprintf(stderr, gettext("internal error! (curncount)\n"));
@@ -2472,6 +2477,7 @@ int main(int argc, char *argv[])
 		}
 
 		int pid = fork();
+
 		if (pid < 0)
 		{
 			perror(gettext("Cannot create child process"));
@@ -2480,6 +2486,7 @@ int main(int argc, char *argv[])
 		}
 		if (pid == 0)
 		{
+
 			while ((dup2(filedes[1], STDOUT_FILENO) < 0) && (errno == EINTR)) { }
 			close(filedes[0]);
 			close(filedes[1]);
@@ -2493,6 +2500,7 @@ int main(int argc, char *argv[])
 
 		hosts[nhosts].read_fd = filedes[0];
 		nhosts++;
+
 	}
 
 	signal(SIGINT, handler_parent);
