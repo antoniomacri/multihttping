@@ -2486,7 +2486,6 @@ int main(int argc, char *argv[])
 		}
 		if (pid == 0)
 		{
-
 			while ((dup2(filedes[1], STDOUT_FILENO) < 0) && (errno == EINTR)) { }
 			close(filedes[0]);
 			close(filedes[1]);
@@ -2494,6 +2493,7 @@ int main(int argc, char *argv[])
 			argv[optind] = argv[i];
 			argc = optind + 1;
 			argv[argc] = NULL; // The C Standard 5.1.2.2.1: argv[argc] shall be a null pointer.
+			optind = 1;
 			return main_single_host(argc, argv);
 		}
 		close(filedes[1]);
