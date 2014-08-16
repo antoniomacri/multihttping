@@ -2421,6 +2421,7 @@ int main(int argc, char *argv[])
 	int c = 0, i = 0;
 	int ncurses_mode = 0;
 	int explicit_url = 0;
+	int aggregate = 0;
 
 	setlocale(LC_ALL, "");
 	bindtextdomain("httping", LOCALEDIR);
@@ -2441,6 +2442,9 @@ int main(int argc, char *argv[])
 			case 'h':
 				explicit_url = 1;
 				break;
+			case 9:
+				aggregate = 1;
+				break;
 		}
 	}
 
@@ -2459,6 +2463,12 @@ int main(int argc, char *argv[])
 	if (ncurses_mode)
 	{
 		fprintf(stderr, gettext("The ncurses interface (-K) is not supported with multiple hosts.\n"));
+		return 1;
+	}
+
+	if (aggregate)
+	{
+		fprintf(stderr, gettext("Option --aggregate is not supported with multiple hosts.\n"));
 		return 1;
 	}
 
