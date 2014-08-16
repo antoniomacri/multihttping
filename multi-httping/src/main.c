@@ -2422,6 +2422,10 @@ int main(int argc, char *argv[])
 	int ncurses_mode = 0;
 	int explicit_url = 0;
 
+	setlocale(LC_ALL, "");
+	bindtextdomain("httping", LOCALEDIR);
+	textdomain("httping");
+
 	while ((c = getopt_long(argc, argv,
 			"DKEA5MvYWT:ZQ6Sy:XL:bBg:h:p:c:i:Gx:t:o:e:falqsmV?I:R:rn:N:zP:U:C:F",
 			long_options, NULL)) != -1)
