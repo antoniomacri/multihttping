@@ -9,6 +9,8 @@
 
 #include <sys/select.h>
 
+#include <jansson.h>
+
 #define MAX_HOSTS FD_SETSIZE
 
 struct host_data
