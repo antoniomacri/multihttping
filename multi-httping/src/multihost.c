@@ -75,9 +75,38 @@ static int parse_child_output(int i)
 			json_is_string(node) ? json_string_value(node) : "?");
 			count += snprintf(buffer + count, sizeof(buffer) - count, " %10s", buff2);
 
+			if (multihost_options.split)
+			{
+				node_value_s = json_string_value(json_object_get(root, "resolve_ms"));
+				double resolve = node_value_s != NULL ? atof(node_value_s) : 0;
+				h->resolve += resolve;
+				count += snprintf(buffer + count, sizeof(buffer) - count, "  %.2lf", resolve);
+
+				node_value_s = json_string_value(json_object_get(root, "connect_ms"));
+				double connect = node_value_s != NULL ? atof(node_value_s) : 0;
+				h->connect += connect;
+				count += snprintf(buffer + count, sizeof(buffer) - count, "+%.2lf", connect);
+
+				node_value_s = json_string_value(json_object_get(root, "write"));
+				double write = node_value_s != NULL ? atof(node_value_s) : 0;
+				h->write += write;
+				count += snprintf(buffer + count, sizeof(buffer) - count, "+%.2lf", write);
+
+				node_value_s = json_string_value(json_object_get(root, "request_ms"));
+				double request = node_value_s != NULL ? atof(node_value_s) : 0;
+				h->request += request;
+				count += snprintf(buffer + count, sizeof(buffer) - count, "+%.2lf", request);
+
+				node_value_s = json_string_value(json_object_get(root, "close"));
+				double close = node_value_s != NULL ? atof(node_value_s) : 0;
+				h->close += close;
+				count += snprintf(buffer + count, sizeof(buffer) - count, "+%.2lf", close);
+			}
+
 			node = json_object_get(root, "total_ms");
 			double total = json_is_string(node) ? atof(json_string_value(node)) : 0;
-			count += snprintf(buffer + count, sizeof(buffer) - count, "  %.2lf", total);
+			count += snprintf(buffer + count, sizeof(buffer) - count, " %s %.2lf",
+					(multihost_options.split ? "=" : ""), total);
 
 			printf("%s\n", buffer);
 		}
@@ -97,7 +126,11 @@ void parse_children_output()
 	printf("Pinging %d hosts...\n\n", nhosts);
 
 	printf("--- Running ---\n");
-	printf("%-*s  %-15s  SeqN  OK  Num.bytes  RTT [ms]\n", hostname_max_length, "Host", "IP");
+	printf("%-*s  %-15s  SeqN  OK  Num.bytes", hostname_max_length, "Host", "IP");
+	if (multihost_options.split)
+		printf("  Resolve+Connect+Write+Request+Close = Total [ms]\n");
+	else
+		printf("  RTT [ms]\n");
 
 	int i;
 	while (1)

@@ -19,7 +19,17 @@ struct host_data
 	char read_buffer[1024];
 	int read_count;
 	int read_fd;
+	double resolve;
+	double connect;
+	double write;
+	double request;
+	double close;
 };
+
+struct
+{
+	int split;
+} multihost_options;
 
 extern struct host_data hosts[MAX_HOSTS];
 extern int nhosts;

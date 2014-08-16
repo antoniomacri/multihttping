@@ -2442,6 +2442,9 @@ int main(int argc, char *argv[])
 			case 'h':
 				explicit_url = 1;
 				break;
+			case 'S':
+				multihost_options.split = 1;
+				break;
 			case 9:
 				aggregate = 1;
 				break;
