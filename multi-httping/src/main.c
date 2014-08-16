@@ -270,7 +270,7 @@ void emit_json(char ok, int seq, double start_ts, stats_t *t_resolve, stats_t *t
 		printf("\"tcp_rtt_stats\" : \"%e\", ", tcp_rtt_stats -> cur);
 	printf("\"re_tx\" : \"%d\", ", re_tx);
 	printf("\"pmtu\" : \"%d\", ", pmtu);
-	printf("\"tos\" : \"%02x\", ", recv_tos);
+	printf("\"tos\" : \"%02x\" ", recv_tos);
 	printf("}");
 }
 
@@ -2495,16 +2495,19 @@ int main(int argc, char *argv[])
 			close(filedes[1]);
 
 			argv[optind] = argv[i];
-			argc = optind + 1;
+			argv[optind + 1] = "-M";
+			argc = optind + 2;
 			argv[argc] = NULL; // The C Standard 5.1.2.2.1: argv[argc] shall be a null pointer.
 			optind = 1;
 			return main_single_host(argc, argv);
 		}
 		close(filedes[1]);
 
+		hosts[nhosts].name = argv[i];
 		hosts[nhosts].read_fd = filedes[0];
 		nhosts++;
 
+		hostname_max_length = max(hostname_max_length, strlen(argv[i]));
 	}
 
 	signal(SIGINT, handler_parent);

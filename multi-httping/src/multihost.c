@@ -5,6 +5,7 @@
  */
 
 #include <errno.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "multihost.h"
@@ -12,22 +13,93 @@
 
 struct host_data hosts[MAX_HOSTS];
 int nhosts = 0;
+int hostname_max_length = 0;
 
-static int parse_child_output(int i, int fd)
+static int parse_child_output(int i)
 {
-	char buffer[1024];
-	int n = read(fd, buffer, 1024);
-	if (n > 0)
+	struct host_data * const h = &hosts[i];
+
+	int n = read(h->read_fd, h->read_buffer + h->read_count, sizeof(h->read_buffer) - h->read_count - 1);
+	if (n <= 0)
 	{
-		write(STDOUT_FILENO, buffer, n);
+		return 0;
 	}
-	return n;
+	h->read_count += n;
+	h->read_buffer[h->read_count] = '\0';
+
+	while (1)
+	{
+		char * b = strchr(h->read_buffer, '{');
+		if (b == NULL)
+		{
+			if (h->read_count >= (int) sizeof(h->read_buffer) - 1)
+			{
+				// The buffer is full and no '{' was found: erase the buffer.
+				h->read_count = 0;
+				fprintf(stderr, "Discarding output from child %d: >%s<\n", i, h->read_buffer);
+			}
+			return 1;
+		}
+
+		json_error_t error;
+		json_t *root = json_loads(b, JSON_DISABLE_EOF_CHECK, &error);
+		if (!root)
+		{
+			fprintf(stderr, "Cannot parse output from child %d: >%s<\n", i, b);
+			return 1;
+		}
+
+		const char *node_value_s = json_string_value(json_object_get(root, "host"));
+		if (node_value_s != NULL)
+		{
+			char buffer[1024];
+			int count = 0;
+			json_t *node;
+
+			count += snprintf(buffer + count, sizeof(buffer) - count, "%-*s  %-15s", hostname_max_length,
+					h->name, node_value_s);
+
+			node = json_object_get(root, "seq");
+			node_value_s = json_is_string(node) ? json_string_value(node) : "?";
+			count += snprintf(buffer + count, sizeof(buffer) - count, " %5s", node_value_s);
+
+			node = json_object_get(root, "status");
+			node_value_s = json_is_string(node) ? json_string_value(node) : "?";
+			count += snprintf(buffer + count, sizeof(buffer) - count, " %3s", node_value_s);
+
+			char buff1[20], buff2[20];
+			node = json_object_get(root, "header_size");
+			strncpy(buff1, json_is_string(node) ? json_string_value(node) : "?", sizeof(buff1));
+			node = json_object_get(root, "data_size");
+			snprintf(buff2, sizeof(buff2), "%s+%s", buff1,
+			json_is_string(node) ? json_string_value(node) : "?");
+			count += snprintf(buffer + count, sizeof(buffer) - count, " %10s", buff2);
+
+			node = json_object_get(root, "total_ms");
+			double total = json_is_string(node) ? atof(json_string_value(node)) : 0;
+			count += snprintf(buffer + count, sizeof(buffer) - count, "  %.2lf", total);
+
+			printf("%s\n", buffer);
+		}
+		else
+		{
+			fprintf(stderr, "Unrecognized element skipped from child %d: >%s<\n", i, b);
+		}
+
+		h->read_count -= (b - h->read_buffer) + error.position;
+		memcpy(h->read_buffer, b + error.position, h->read_count + 1);  // +1 for '\0'
+	}
+	return 1;
 }
 
 void parse_children_output()
 {
-	int i;
+	printf("Pinging %d hosts...\n\n", nhosts);
 
+	printf("--- Running ---\n");
+	printf("%-*s  %-15s  SeqN  OK  Num.bytes  RTT [ms]\n", hostname_max_length, "Host", "IP");
+
+	int i;
 	while (1)
 	{
 		int max_fd = 0;
@@ -56,7 +128,7 @@ void parse_children_output()
 		{
 			if (FD_ISSET(hosts[i].read_fd, &read_set))
 			{
-				if (!parse_child_output(i, hosts[i].read_fd))
+				if (!parse_child_output(i))
 				{
 					// Child terminated.
 					close(hosts[i].read_fd);
