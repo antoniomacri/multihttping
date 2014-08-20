@@ -15,6 +15,9 @@ struct host_data hosts[MAX_HOSTS];
 int nhosts = 0;
 int hostname_max_length = 0;
 
+//stats
+stats hstat[MAX_HOSTS];
+
 static int parse_child_output(int i)
 {
 	struct host_data * const h = &hosts[i];
@@ -107,7 +110,6 @@ static int parse_child_output(int i)
 			double total = json_is_string(node) ? atof(json_string_value(node)) : 0;
 			count += snprintf(buffer + count, sizeof(buffer) - count, " %s %.2lf",
 					(multihost_options.split ? "=" : ""), total);
-
 			printf("%s\n", buffer);
 		}
 		else
@@ -159,15 +161,26 @@ void parse_children_output()
 
 		for (i = 0; i < nhosts; i++)
 		{
+
 			if (FD_ISSET(hosts[i].read_fd, &read_set))
 			{
 				if (!parse_child_output(i))
 				{
 					// Child terminated.
 					close(hosts[i].read_fd);
+					//prova statistiche multi
+					printf("--%s -- -- statistics--\n",hosts[i]);
+					printf("AVG RTT\n");
+					printf("MIN TIME\n");
+					printf("MAX TIME\n");
+
+					//fineprova
 					hosts[i].read_fd = -1;
 				}
 			}
 		}
 	}
 }
+
+
+

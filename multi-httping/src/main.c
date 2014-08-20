@@ -1437,6 +1437,8 @@ int main_single_host(int argc, char *argv[])
 		else
 #endif
 		printf("PING %s%s:%s%d%s (%s):\n", c_green, hostname, c_bright, portnr, c_normal, get);
+		//intestazione
+		printf("\nAddress\t   %-12s Bytes\tSeq   Time\n");
 
 	}
 
@@ -2158,14 +2160,20 @@ persistent_loop:
 				else if (offset_yellow > 0.0 && t_total.cur >= offset_yellow)
 					ms_color = c_yellow;
 
+				//modifica riga connected to
 				if (!ncurses_mode)
-					str_add(&line, "%s%s ", c_white, operation);
+				//str_add(&line, "%s%s ", c_white, operation);
+				str_add(&line, "%s ", c_white);
 
 				if (persistent_connections && show_bytes_xfer)
-					str_add(&line, gettext("%s%s%s%s%s:%s%d%s (%d/%d bytes), seq=%s%d%s "), c_red, i6_bs, current_host, i6_be, c_white, c_yellow, portnr, c_white, headers_len, len, c_blue, curncount-1, c_white);
+					//str_add(&line, gettext("%s%s%s%s%s:%s%d%s (%d/%d bytes), seq=%s%d%s "), c_red, i6_bs, current_host, i6_be, c_white, c_yellow, portnr, c_white, headers_len, len, c_blue, curncount-1, c_white);
+
+					str_add(&line, gettext("%s%s%s%s%s:%s%d%s (%d/%d bytes), %s  %d%  s "), c_red, i6_bs, current_host, i6_be, c_white, c_yellow, portnr, c_white, headers_len, len, c_blue, curncount-1, c_white);
 				else
 				//aggiunto nome
-					str_add(&line, gettext("%s\n Address: %s%s%s%s%s:%s%d%s (%d bytes), seq=%s%d%s "), complete_url, c_red, i6_bs, current_host, i6_be, c_white, c_yellow, portnr, c_white, headers_len, c_blue, curncount-1, c_white);
+//					str_add(&line, gettext("%s%s%s%s%s:%s%d%s (%d bytes), seq=%s%d%s "), c_red, i6_bs, current_host, i6_be, c_white, c_yellow, portnr, c_white, headers_len, c_blue, curncount-1, c_white);
+
+					str_add(&line, gettext("%s%s%s%s%s:%s%d%s (%d bytes), %s  %d  %s "), c_red, i6_bs, current_host, i6_be, c_white, c_yellow, portnr, c_white, headers_len, c_blue, curncount-1, c_white);
 
 				char *tot_str = format_value(t_total.cur, 6, 2, abbreviate);
 
@@ -2176,8 +2184,9 @@ persistent_loop:
 					char *wri_str = format_value(t_write.cur, 6, 2, abbreviate);
 					char *req_str = format_value(t_request.cur, 6, 2, abbreviate);
 					char *clo_str = format_value(t_close.cur, 6, 2, abbreviate);
-
-					str_add(&line, gettext("time=%s+%s+%s+%s+%s%s=%s%s%s%s ms %s%s%s"), res_str, con_str, wri_str, req_str, clo_str, sep, unsep, ms_color, tot_str, c_white, c_cyan, sc?sc:"", c_white);
+					//mod riga
+//					str_add(&line, gettext("time=%s+%s+%s+%s+%s%s=%s%s%s%s ms %s%s%s"), res_str, con_str, wri_str, req_str, clo_str, sep, unsep, ms_color, tot_str, c_white, c_cyan, sc?sc:"", c_white);
+					str_add(&line, gettext("%s+%s+%s+%s+%s%s=%s%s%s%s ms %s%s%s"), res_str, con_str, wri_str, req_str, clo_str, sep, unsep, ms_color, tot_str, c_white, c_cyan, sc?sc:"", c_white);
 
 					free(clo_str);
 					free(req_str);
@@ -2187,7 +2196,9 @@ persistent_loop:
 				}
 				else
 				{
-					str_add(&line, gettext("time=%s%s%s ms %s%s%s"), ms_color, tot_str, c_white, c_cyan, sc?sc:"", c_white);
+//					str_add(&line, gettext("time=%s%s%s ms %s%s%s"), ms_color, tot_str, c_white, c_cyan, sc?sc:"", c_white);
+
+					str_add(&line, gettext("%s%s%s ms %s%s%s"), ms_color, tot_str, c_white, c_cyan, sc?sc:"", c_white);
 				}
 
 				free(tot_str);
@@ -2340,9 +2351,7 @@ persistent_loop:
 	if (!quiet && !machine_readable && !nagios_mode && !json_output)
 	{
 		int dummy = count;
-//aggiunt pid
-		int pid=getpid();
-		printf(gettext("--- pid %d %s ping statistics  ---\n"), pid, complete_url);
+		printf(gettext("---  %s ping statistics  ---\n"), complete_url);
 
 
 		if (curncount == 0 && err > 0)
@@ -2527,6 +2536,7 @@ int main(int argc, char *argv[])
 	signal(SIGTERM, handler_parent);
 
 	parse_children_output();
+
 
 	printf(gettext("Waiting for all children to exit.\n"));
 	while (waitpid(-1, NULL, 0))
