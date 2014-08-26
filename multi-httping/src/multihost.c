@@ -18,6 +18,7 @@ int hostname_max_length = 0;
 //stats
 stats hstat[MAX_HOSTS];
 
+
 static int parse_child_output(int i)
 {
 	struct host_data * const h = &hosts[i];
@@ -104,6 +105,14 @@ static int parse_child_output(int i)
 				double close = node_value_s != NULL ? atof(node_value_s) : 0;
 				h->close += close;
 				count += snprintf(buffer + count, sizeof(buffer) - count, "+%.2lf", close);
+				//calcolo min max
+				double val=connect+request+write+resolve;
+				hstat[i].min=val;
+				if (hstat[i].max<=val) hstat[i].max=val;
+				if (hstat[i].min>=val) hstat[i].min=val;
+
+
+
 			}
 
 			node = json_object_get(root, "total_ms");
@@ -170,9 +179,13 @@ void parse_children_output()
 					close(hosts[i].read_fd);
 					//prova statistiche multi
 					printf("--%s -- -- statistics--\n",hosts[i]);
-					printf("AVG RTT\n");
-					printf("MIN TIME\n");
-					printf("MAX TIME\n");
+
+					printf("MIN TIME%9f\n",hstat[i].min);
+					printf("MAX TIME%9f\n",hstat[i].max);
+					hstat[i].avg=(hstat[i].max+hstat[i].min)/2;
+					printf("AVG RTT %9f\n",hstat[i].avg);
+
+
 
 					//fineprova
 					hosts[i].read_fd = -1;

@@ -35,6 +35,19 @@ extern struct host_data hosts[MAX_HOSTS];
 extern int nhosts;
 extern int hostname_max_length;
 
+typedef struct
+{
+	double min, avg, max;
+} stats;
+
+
+
+
+
 void parse_children_output();
+
+
+
+
 
 #endif
