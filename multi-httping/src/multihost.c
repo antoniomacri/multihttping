@@ -18,7 +18,6 @@ int hostname_max_length = 0;
 //stats
 stats hstat[MAX_HOSTS];
 
-
 static int parse_child_output(int i)
 {
 	struct host_data * const h = &hosts[i];
@@ -78,6 +77,7 @@ static int parse_child_output(int i)
 			snprintf(buff2, sizeof(buff2), "%s+%s", buff1,
 			json_is_string(node) ? json_string_value(node) : "?");
 			count += snprintf(buffer + count, sizeof(buffer) - count, " %10s", buff2);
+			hstat[i].count++;
 
 			if (multihost_options.split)
 			{
@@ -95,7 +95,6 @@ static int parse_child_output(int i)
 				double write = node_value_s != NULL ? atof(node_value_s) : 0;
 				h->write += write;
 				count += snprintf(buffer + count, sizeof(buffer) - count, "+%.2lf", write);
-
 				node_value_s = json_string_value(json_object_get(root, "request_ms"));
 				double request = node_value_s != NULL ? atof(node_value_s) : 0;
 				h->request += request;
@@ -107,11 +106,9 @@ static int parse_child_output(int i)
 				count += snprintf(buffer + count, sizeof(buffer) - count, "+%.2lf", close);
 				//calcolo min max
 				double val=connect+request+write+resolve;
-				hstat[i].min=val;
+				hstat[i].min=connect+request+write+resolve;
 				if (hstat[i].max<=val) hstat[i].max=val;
 				if (hstat[i].min>=val) hstat[i].min=val;
-
-
 
 			}
 
@@ -120,6 +117,13 @@ static int parse_child_output(int i)
 			count += snprintf(buffer + count, sizeof(buffer) - count, " %s %.2lf",
 					(multihost_options.split ? "=" : ""), total);
 			printf("%s\n", buffer);
+			//calcolo max min
+			hstat[i].min=total;
+			if (hstat[i].max<=total) hstat[i].max=total;
+			if (hstat[i].min>=total) hstat[i].min=total;
+			hstat[i].total+=total;
+
+
 		}
 		else
 		{
@@ -177,13 +181,15 @@ void parse_children_output()
 				{
 					// Child terminated.
 					close(hosts[i].read_fd);
-					//prova statistiche multi
+					//statistiche multi
 					printf("--%s -- -- statistics--\n",hosts[i]);
-
-					printf("MIN TIME%9f\n",hstat[i].min);
-					printf("MAX TIME%9f\n",hstat[i].max);
-					hstat[i].avg=(hstat[i].max+hstat[i].min)/2;
-					printf("AVG RTT %9f\n",hstat[i].avg);
+					//calcolo media
+					hstat[i].avg=hstat[i].total/hstat[i].count;
+					printf("%u Pings\n",hstat[i].count);
+					printf("MIN RTT TIME %f\n",hstat[i].min);
+					printf("MAX RTT TIME %f\n",hstat[i].max);
+					printf("AVG RTT TIME %f\n",hstat[i].avg);
+					printf("TOTAL TIME %f\n",hstat[i].total);
 
 
 

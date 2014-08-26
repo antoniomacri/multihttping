@@ -37,7 +37,8 @@ extern int hostname_max_length;
 
 typedef struct
 {
-	double min, avg, max;
+	double min, avg, max, total;
+	int count;
 } stats;
 
 
