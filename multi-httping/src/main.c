@@ -2395,7 +2395,7 @@ error_exit:
 
 	free_cookies(static_cookies, n_static_cookies);
 	free_cookies(dynamic_cookies, n_dynamic_cookies);
-	freeaddrinfo(ai);
+	if (ai) freeaddrinfo(ai);
 	free(request);
 	free(get);
 	free(hostname);
