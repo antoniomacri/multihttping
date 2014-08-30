@@ -41,14 +41,8 @@ typedef struct
 	int count;
 } stats;
 
-
-
-
-
 void parse_children_output();
 
-
-
-
+void show_statistics();
 
 #endif

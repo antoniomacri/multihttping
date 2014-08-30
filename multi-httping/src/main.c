@@ -2541,8 +2541,8 @@ int main(int argc, char *argv[])
 
 	parse_children_output();
 
+	show_statistics();
 
-	printf(gettext("Waiting for all children to exit.\n"));
 	while (waitpid(-1, NULL, 0))
 	{
 		if (errno == ECHILD)

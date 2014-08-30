@@ -122,8 +122,6 @@ static int parse_child_output(int i)
 			if (hstat[i].max<=total) hstat[i].max=total;
 			if (hstat[i].min>=total) hstat[i].min=total;
 			hstat[i].total+=total;
-
-
 		}
 		else
 		{
@@ -181,19 +179,6 @@ void parse_children_output()
 				{
 					// Child terminated.
 					close(hosts[i].read_fd);
-					//statistiche multi
-					printf("--%s -- -- statistics--\n",hosts[i]);
-					//calcolo media
-					hstat[i].avg=hstat[i].total/hstat[i].count;
-					printf("%u Pings\n",hstat[i].count);
-					printf("MIN RTT TIME %f\n",hstat[i].min);
-					printf("MAX RTT TIME %f\n",hstat[i].max);
-					printf("AVG RTT TIME %f\n",hstat[i].avg);
-					printf("TOTAL TIME %f\n",hstat[i].total);
-
-
-
-					//fineprova
 					hosts[i].read_fd = -1;
 				}
 			}
@@ -201,5 +186,20 @@ void parse_children_output()
 	}
 }
 
+void show_statistics()
+{
+	printf("\n--- Statistics ---\n");
 
-
+	int i;
+	for (i = 0; i < nhosts; i++)
+	{
+		printf("--%s -- -- statistics--\n", hosts[i]);
+		//calcolo media
+		hstat[i].avg = hstat[i].total / hstat[i].count;
+		printf("%u Pings\n", hstat[i].count);
+		printf("MIN RTT TIME %f\n", hstat[i].min);
+		printf("MAX RTT TIME %f\n", hstat[i].max);
+		printf("AVG RTT TIME %f\n", hstat[i].avg);
+		printf("TOTAL TIME %f\n", hstat[i].total);
+	}
+}
