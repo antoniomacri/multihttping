@@ -244,14 +244,19 @@ void emit_json(char ok, int seq, double start_ts, stats_t *t_resolve, stats_t *t
 	printf("\"status\" : \"%d\", ", ok);
 	printf("\"seq\" : \"%d\", ", seq);
 	printf("\"start_ts\" : \"%f\", ", start_ts);
+	printf("\"http_code\" : \"%d\", ", http_code);
+	printf("\"msg\" : \"%s\"", msg);
+	if (!ok) {
+		printf(" }");
+		return;
+	}
+	printf(", ");
 	if (t_resolve -> cur_valid)
 		printf("\"resolve_ms\" : \"%e\", ", t_resolve -> cur);
 	if (t_connect -> cur_valid)
 		printf("\"connect_ms\" : \"%e\", ", t_connect -> cur);
 	printf("\"request_ms\" : \"%e\", ", t_request -> cur);
 	printf("\"total_ms\" : \"%e\", ", t_total -> cur);
-	printf("\"http_code\" : \"%d\", ", http_code);
-	printf("\"msg\" : \"%s\", ", msg);
 	printf("\"header_size\" : \"%d\", ", header_size);
 	printf("\"data_size\" : \"%d\", ", data_size);
 	printf("\"bps\" : \"%f\", ", Bps);
