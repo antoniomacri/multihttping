@@ -173,7 +173,7 @@ void parse_children_output()
 		for (i = 0; i < nhosts; i++)
 		{
 
-			if (FD_ISSET(hosts[i].read_fd, &read_set))
+			if (hosts[i].read_fd >= 0 && FD_ISSET(hosts[i].read_fd, &read_set))
 			{
 				if (!parse_child_output(i))
 				{
