@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
@@ -2533,7 +2534,7 @@ int main(int argc, char *argv[])
 		hosts[nhosts].read_fd = filedes[0];
 		nhosts++;
 
-		hostname_max_length = max(hostname_max_length, strlen(argv[i]));
+		hostname_max_length = max(hostname_max_length, (int)strlen(argv[i]));
 	}
 
 	signal(SIGINT, handler_parent);

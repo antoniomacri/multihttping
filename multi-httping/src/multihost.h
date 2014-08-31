@@ -11,7 +11,7 @@
 
 #include <jansson.h>
 
-#define MAX_HOSTS FD_SETSIZE
+#define MAX_HOSTS ((int)FD_SETSIZE)
 
 struct host_data
 {
