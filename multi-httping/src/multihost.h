@@ -13,17 +13,28 @@
 
 #define MAX_HOSTS ((int)FD_SETSIZE)
 
+struct host_time
+{
+	double min;
+	double max;
+	double sum;
+	int count;
+};
+
 struct host_data
 {
-	char *name;
+	const char *name;
 	char read_buffer[1024];
 	int read_count;
 	int read_fd;
-	double resolve;
-	double connect;
-	double write;
-	double request;
-	double close;
+	struct host_time resolve;
+	struct host_time connect;
+	struct host_time write;
+	struct host_time request;
+	struct host_time close;
+	struct host_time total;
+	int packets_received;
+	int packets_failed;
 };
 
 struct
@@ -35,11 +46,7 @@ extern struct host_data hosts[MAX_HOSTS];
 extern int nhosts;
 extern int hostname_max_length;
 
-typedef struct
-{
-	double min, avg, max, total;
-	int count;
-} stats;
+void initialize_host(struct host_data *host, const char *name, int read_fd);
 
 void parse_children_output();
 

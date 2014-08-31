@@ -2515,8 +2515,7 @@ int main(int argc, char *argv[])
 		}
 		close(filedes[1]);
 
-		hosts[nhosts].name = argv[i];
-		hosts[nhosts].read_fd = filedes[0];
+		initialize_host(&hosts[nhosts], argv[i], filedes[0]);
 		nhosts++;
 
 		hostname_max_length = max(hostname_max_length, (int)strlen(argv[i]));
