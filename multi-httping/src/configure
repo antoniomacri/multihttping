@@ -85,11 +85,21 @@ else
 	FW=""
 fi
 
+$CC -O0 -I/usr/local/include -o $FILE test_intl.c 2> $FILE2
+if [ $? -eq 0 ] ; then
+	echo \+ system does not require explicit linking of libintl
+	INTL=""
+else
+	echo \- system requires explicit linking of libintl
+	INTL="INTL=yes"
+fi
+
 > makefile.inc
 echo $NC  >> makefile.inc
 echo $SSL >> makefile.inc
 echo $TFO >> makefile.inc
 echo $FW >> makefile.inc
+echo $INTL >> makefile.inc
 
 rm -f $FILE $FILE2
 

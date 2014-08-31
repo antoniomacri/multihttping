@@ -92,6 +92,11 @@ OBJS+=fft.o
 LDFLAGS+=-lfftw3
 endif
 
+ifeq ($(INTL),yes)
+CFLAGS+=-I/usr/local/include
+LDFLAGS+=-L/usr/local/lib -lintl
+endif
+
 ifeq ($(DEBUG),yes)
 CFLAGS+=-D_DEBUG -ggdb
 LDFLAGS+=-g
