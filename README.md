@@ -4,7 +4,7 @@ Supporto multihost a un'applicazione di http-ping con calcolo di valori per la v
 
 Modifiche apportate
 -----------------------
-* generazione di processi figli per la gestione del multi body! uno per ogni indirizzò specificato in input
+* generazione di processi figli per la gestione del multihost uno per ogni indirizzò specificato in input
 * raccolta dati da ciascun processo per il calcolo dei valori di minimo, massimo e medio del RTT
 * disabilitazione di alcune opzioni presenti nell'applicazione
 * inserimento dell'opzione -S per la visualizzazione degli intervalli temporali delle varie fasi di comunicazione
