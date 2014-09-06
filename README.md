@@ -10,22 +10,22 @@ Se viene specificato un solo host, il programma si comporta come l'httping class
 
 Lo sviluppo del progetto è stato guidato sin dall'inizio dalla intenzione di modificare il meno possibile il codice esistente. La funzione `main()` originaria, rinominata in `main_single_host()`, è stata modificata solo in alcuni parti, con l'obiettivo di riformattare l'output e uniformarlo al caso multihost. Il nuovo `main()` è stato invece riscritto da zero, in modo da permettere al processo padre di intercettare e manipolare le opzioni passate dalla linea di comando, oltre che di individuare gli host. Per il corretto funzionamento dell'applicazione, infatti, nel caso multihost si rende necessario rilevare possibili conflitti tra opzioni o modalità non supportate, avvisando di conseguenza l'utente. Nello specifico:
 
-    * viene intercettata l'opzione `-K` (interfaccia *ncurses*), in quanto non è attualmente supportata in modalità multihost;
-    * vengono intercettate le opzioni `-g` (`--url`) e `-h` (`--hostname`), che servono a determinare la modalità di funzionamento (single-host o multi-host);
-    * viene intercettata l'opzione `--aggregate` (visualizzazione dati aggregati per gruppi di pacchetti), in quanto non supportata in modalità multihost.
+  * viene intercettata l'opzione `-K` (interfaccia *ncurses*), in quanto non è attualmente supportata in modalità multihost;
+  * vengono intercettate le opzioni `-g` (`--url`) e `-h` (`--hostname`), che servono a determinare la modalità di funzionamento (single-host o multi-host);
+  * viene intercettata l'opzione `--aggregate` (visualizzazione dati aggregati per gruppi di pacchetti), in quanto non supportata in modalità multihost.
 
 Gli argomenti da linea di comando vengono esaminati dal processo principale, per determinare innanzitutto se la modalità di esecuzione sarà single o multi-host, in accordo alla quale dovranno essere accettate le opzioni specificate. Una volte rilevata la modalità di funzionamento, il processo principale provvederà a eseguire le operazioni relative:
 
-    * in modalità single-host, vengono svolte le operazioni di ping come previsto dal main originale;
-    * in modalità multi-host, vengono generati i processi figli specificandogli delle direttive di esecuzione (che vengono aggiunte alle opzioni a riga di comando passate ai figli).
+  * in modalità single-host, vengono svolte le operazioni di ping come previsto dal main originale;
+  * in modalità multi-host, vengono generati i processi figli specificandogli delle direttive di esecuzione (che vengono aggiunte alle opzioni a riga di comando passate ai figli).
 
 
 Modifiche apportate
 -----------------------
-* generazione di processi figli per la gestione del multihost uno per ogni indirizzò specificato in input
-* raccolta dati da ciascun processo per il calcolo dei valori di minimo, massimo e medio del RTT
-* disabilitazione di alcune opzioni presenti nell'applicazione
-* inserimento dell'opzione -S per la visualizzazione degli intervalli temporali delle varie fasi di comunicazione
+  * generazione di processi figli per la gestione del multihost uno per ogni indirizzò specificato in input
+  * raccolta dati da ciascun processo per il calcolo dei valori di minimo, massimo e medio del RTT
+  * disabilitazione di alcune opzioni presenti nell'applicazione
+  * inserimento dell'opzione -S per la visualizzazione degli intervalli temporali delle varie fasi di comunicazione
 
 
 Gestione multihost
