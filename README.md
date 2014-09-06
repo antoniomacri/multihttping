@@ -13,7 +13,7 @@ Problemi riscontrati
 ----------------------
 * l'applicazione non mostra gli indirizzi ip su FreeBSD OS, é un problema dell'applicazione originale che abbiamo deciso di non modificare per non alterare troppo il codice. Su altri sistemi Linux (es. Ubuntu) il problema non si presenta
 * estrazione dei valori temporali dei processi figli risolto con una struttura dati apposita per il salvataggio di questi ultimi con dichiarazione:
-  Struct host_time {
+  *Struct host_time {
                      Double min, max, sum; 
                      //per il calcolo di minimo massimo e media
                      int count;
