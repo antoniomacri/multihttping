@@ -29,7 +29,7 @@
 
 include version
 
-TARGET=httping
+TARGET=multihttping
 
 JANSSON=../../jansson
 JSONINCLUDE=$(JANSSON)/src
