@@ -1,14 +1,15 @@
 Scopo del progetto
 ----------------------
-Supporto multihost a un'applicazione di http-ping con calcolo di valori per la valutazione delle tempistiche di ping
+
+Lo scopo del progetto è estendere il noto programma *httping* implementando la gestione di host multipli. L'applicazione deve essere distribuita mediante il meccanismo dei port usato sul sistema operativo FreeBSD.
 
 
 Funzionamento di base
 ---------------------
 
-Se viene specificato un solo host, il programma si comporta come l'httping classico (caso base). Se vengono specificati più host, il programma crea tanti processi figli ciascuno deputato a gestire un singolo host. Il processo padre riceve i dati da tutti i figli, ne calcola le statistiche e le mostra a video.
+Nel caso base in cui viene specificato un solo host, il programma si comporta come l'httping classico. Se vengono specificati più host, invece, il programma crea tanti processi figli ciascuno deputato a gestire un singolo host, dopodiché si pone in attesa di ricevere i dati da essi, ne calcola le statistiche per tutto il corso dell'esecuzione e infine le mostra a video.
 
-Lo sviluppo del progetto è stato guidato sin dall'inizio dalla intenzione di modificare il meno possibile il codice esistente. La funzione `main()` originaria, rinominata in `main_single_host()`, è stata modificata solo in alcuni parti, con l'obiettivo di riformattare l'output e uniformarlo al caso multihost. Il nuovo `main()` è stato invece riscritto da zero, in modo da permettere al processo padre di intercettare e manipolare le opzioni passate dalla linea di comando, oltre che di individuare gli host. Per il corretto funzionamento dell'applicazione, infatti, nel caso multihost si rende necessario rilevare possibili conflitti tra opzioni o modalità non supportate, avvisando di conseguenza l'utente. Nello specifico:
+Lo sviluppo del progetto è stato guidato sin da subito dall'intenzione di modificare il meno possibile il codice esistente. La funzione `main()` originaria, rinominata in `main_single_host()`, è stata modificata solo in alcuni parti, con l'obiettivo di riformattare l'output e uniformarlo al caso multihost. Il nuovo `main()` è stato invece scritto da zero, in modo da permettere al processo padre di intercettare e manipolare le opzioni passate dalla linea di comando, oltre che di individuare gli host. Per il corretto funzionamento dell'applicazione, infatti, nel caso multihost si rende necessario rilevare possibili conflitti tra opzioni o modalità non supportate, avvisando di conseguenza l'utente. Nello specifico:
 
   * viene intercettata l'opzione `-K` (interfaccia *ncurses*), in quanto non è attualmente supportata in modalità multihost;
   * vengono intercettate le opzioni `-g` (`--url`) e `-h` (`--hostname`), che servono a determinare la modalità di funzionamento (single-host o multi-host);
