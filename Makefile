@@ -6,6 +6,15 @@ PORTDIR		= /usr/ports/net/multihttping
 
 .PHONY: port
 
+build:
+	gmake -C multi-httping/src
+
+build-clean:
+	gmake -C multi-httping/src clean
+
+build-distclean:
+	gmake -C multi-httping/src distclean
+
 port:
 	@echo Recreating port folder...
 	rm -rf $(PORTDIR)
