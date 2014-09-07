@@ -3,17 +3,18 @@ OLDPORTNAME	= httping
 PORTNAME	= multihttping
 PORTVERSION = 2.3.4
 PORTDIR		= /usr/ports/net/multihttping
+SRCDIR		= src
 
 .PHONY: port
 
 build:
-	$(MAKE) -C multi-httping/src
+	$(MAKE) -C $(SRCDIR)
 
 build-clean:
-	$(MAKE) -C multi-httping/src clean
+	$(MAKE) -C $(SRCDIR) clean
 
 build-distclean:
-	$(MAKE) -C multi-httping/src distclean
+	$(MAKE) -C $(SRCDIR) distclean
 
 port:
 	@echo Recreating port folder...
@@ -30,10 +31,10 @@ port:
 	done;
 	@echo
 	@echo Cleaning project files...
-	gmake -C multi-httping/src distclean
+	gmake -C $(SRCDIR) distclean
 	@echo
 	@echo Copying all project files to the port directory...
-	cp multi-httping/src/* $(PORTDIR)/work/$(PORTNAME)-$(PORTVERSION)
+	cp $(SRCDIR)/* $(PORTDIR)/work/$(PORTNAME)-$(PORTVERSION)
 	@echo
 	@echo Generating patches...
 	make -C $(PORTDIR) makepatch

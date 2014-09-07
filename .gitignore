@@ -7,7 +7,7 @@ obj/
 .project
 .cproject
 TODO
-multi-httping/src/*.o
-multi-httping/src/multihttping
-multi-httping/src/makefile.inc
-multi-httping/src/nl.mo
+src/*.o
+src/multihttping
+src/makefile.inc
+src/nl.mo
