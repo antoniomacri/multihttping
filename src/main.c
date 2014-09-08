@@ -2088,7 +2088,11 @@ persistent_loop:
 
 				if (proxy_host)
 					snprintf(current_host, sizeof current_host, "%s", hostname);
+#if __FreeBSD__
+				else if (getnameinfo((const struct sockaddr *)&addr, sizeof(struct sockaddr), current_host, sizeof current_host, NULL, 0, NI_NUMERICHOST) == -1)
+#else
 				else if (getnameinfo((const struct sockaddr *)&addr, sizeof addr, current_host, sizeof current_host, NULL, 0, NI_NUMERICHOST) == -1)
+#endif
 					snprintf(current_host, sizeof current_host, gettext("getnameinfo() failed: %d (%s)"), errno, strerror(errno));
 
 				emit_json(1, curncount, dstart, &t_resolve, &t_connect, &t_request, atoi(sc ? sc : "-1"), sc ? sc : "?", headers_len, len, Bps, current_host, fp, toff_diff_ts, tfo_success, &t_ssl, &t_write, &t_close, n_dynamic_cookies, &stats_to, &tcp_rtt_stats, re_tx, pmtu, recv_tos, &t_total);
@@ -2149,7 +2153,11 @@ persistent_loop:
 
 				if (proxy_host)
 					snprintf(current_host, sizeof current_host, "%s", hostname);
+#if __FreeBSD__
+				else if (getnameinfo((const struct sockaddr *)&addr, sizeof(struct sockaddr), current_host, sizeof current_host, NULL, 0, NI_NUMERICHOST) == -1)
+#else
 				else if (getnameinfo((const struct sockaddr *)&addr, sizeof addr, current_host, sizeof current_host, NULL, 0, NI_NUMERICHOST) == -1)
+#endif
 					snprintf(current_host, sizeof current_host, gettext("getnameinfo() failed: %d (%s)"), errno, strerror(errno));
 
 				const char *i6_bs = "", *i6_be = "";
