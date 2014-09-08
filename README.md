@@ -61,4 +61,4 @@ Problemi riscontrati
 
 Come conseguenza della particolare metodologia usata, il programma risente di alcune limitazioni. La comunicazione con i processi figli è limitata alla lettura del loro output e di conseguenza è essenzialmente unidirezionale. Questo fa sì che non sia possibile negoziare le informazioni ottenibili al di fuori di quelle che i processi figli forniscono esplicitamente.
 
-* l'applicazione non mostra gli indirizzi ip su FreeBSD OS, é un problema dell'applicazione originale che abbiamo deciso di non modificare per non alterare troppo il codice. Su altri sistemi Linux (es. Ubuntu) il problema non si presenta
+L'applicazione originale presentava un problema nell'ottenimento dell'indirizzo IP degli host contattati durante ciascuna connessione. Tale problema era dovuto a un conflitto tra formato IPv4 e IPv6 dell'indirizzo ed è stato risolto semplicemente specificando la corretta dimensione della struttura che viene passata come argomento alla funzione di gestione, in modo che essa riconosca l'indirizzo passato come IPv4.
